@@ -80,7 +80,9 @@ class Track:
         self._n_init = n_init
         self._max_age = max_age
         self.class_name = class_name
-        self.color = color
+        self.colors = []
+        if color is not None:
+            self.colors.append(color)
 
     def to_tlwh(self):
         """Get current position in bounding box format `(top left x, top left y,
@@ -115,7 +117,8 @@ class Track:
         return self.class_name
 
     def get_color(self):
-        return self.color
+        """Return color that has been detected most often"""
+        return max(set(self.colors), key=self.colors.count)
 
     def predict(self, kf):
         """Propagate the state distribution to the current time step using a
@@ -146,6 +149,7 @@ class Track:
         self.mean, self.covariance = kf.update(
             self.mean, self.covariance, detection.to_xyah())
         self.features.append(detection.feature)
+        self.colors.append(detection.color)
 
         self.hits += 1
         self.time_since_update = 0
