@@ -12,12 +12,12 @@ def find_color(roi, colors, threshold=0.0):
   threshold: minimum fraction of image containing either of the colors necessary to be detected
   """
 
-  color_dict = {'white': [[0, 0, 215], [180, 40, 255]],
+  color_dict = {'white': [[0, 0, 40], [180, 90, 255]],
                 'red': [[170, 50, 50], [180, 255, 255], [0, 50, 50], [10, 255, 255]],
                 'yellow': [[20, 50, 50], [30, 255, 255]],
                 'green': [[50, 50, 50], [80, 255, 255]],
                 'blue': [[81, 50, 50], [125, 255, 255]],
-                'light blue': [[81, 50, 50], [105, 255, 255]],
+                'light blue': [[81, 100, 50], [105, 255, 255]],
                 'dark blue': [[106, 50, 50], [125, 255, 255]],
                 'purple': [[126, 50, 50], [140, 255, 255]],
                 'pink': [[141, 50, 50], [169, 255, 255]],
