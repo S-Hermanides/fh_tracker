@@ -189,7 +189,7 @@ def main(_argv):
         scores = np.delete(scores, deleted_indx, axis=0)
 
         # detect jersey color
-        patches = [gdet.extract_image_patch(frame, box, patch_shape=None) for box in bboxes]
+        patches = [gdet.extract_image_patch(frame, box) for box in bboxes]
         colors = [find_color(patch, FLAGS.jersey_colors, threshold = 0.0) for patch in patches]
 
         # encode yolo detections and feed to tracker
