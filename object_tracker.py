@@ -45,6 +45,7 @@ flags.DEFINE_boolean('dont_show', True, 'dont show video output')
 flags.DEFINE_boolean('info', False, 'show detailed info of tracked objects')
 flags.DEFINE_boolean('count', False, 'count objects being tracked on screen')
 flags.DEFINE_list('jersey_colors', ['white', 'blue'], 'list of jersey colors Team1, Team 2, optional: other')
+flags.DEFINE_float('color_threshold', 0.0, 'color detection min percentage to assign jersey color to player')
 
 def main(_argv):
     # Definition of the parameters
@@ -190,7 +191,8 @@ def main(_argv):
 
         # detect jersey color
         patches = [gdet.extract_image_patch(frame, box, [box[3], box[2]]) for box in bboxes]
-        colors = [find_color(patch, FLAGS.jersey_colors, threshold = 0.0) for patch in patches]
+        colors = [find_color(patch, FLAGS.jersey_colors, threshold = FLAGS.color_threshold)
+                  for patch in patches]
 
         # encode yolo detections and feed to tracker
         features = encoder(frame, bboxes)
