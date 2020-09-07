@@ -25,7 +25,7 @@ def find_color(roi, colors, threshold=0.0):
                 'black': [[0, 0, 0], [180, 40, 20]],
                 'grey': [[0, 0, 21], [180, 25, 160]]}
 
-  roi_hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+  roi_hsv = cv2.cvtColor(roi, cv2.COLOR_RGB2HSV)
   total_pixels = roi.shape[0] * roi.shape[1]
   highest_color = None
   highest_perc = 0
