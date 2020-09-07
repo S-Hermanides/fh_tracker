@@ -117,7 +117,7 @@ class Track:
         return self.class_name
 
     def get_color(self):
-        """Return color that has been detected most often"""
+        """Return color that has been detected most often for this track"""
         if self.colors:
             return max(set(self.colors), key=self.colors.count)
         else:
@@ -139,7 +139,7 @@ class Track:
 
     def update(self, kf, detection):
         """Perform Kalman filter measurement update step and update the feature
-        cache.
+        cache and color detection list.
 
         Parameters
         ----------
@@ -153,7 +153,11 @@ class Track:
             self.mean, self.covariance, detection.to_xyah())
         self.features.append(detection.feature)
         if detection.color is not None:
-            self.colors.append(detection.color)
+            if len(self.colors) < 30:
+                self.colors.append(detection.color)
+            else:
+                del self.colors[0]
+                self.colors.append(detection.color)
 
         self.hits += 1
         self.time_since_update = 0
