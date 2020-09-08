@@ -49,4 +49,7 @@ def find_color(roi, colors, threshold=0.0):
     else:
       print(f'{color} not in color dictionary')
       break
-  return highest_color
+  if highest_color:
+    return highest_color
+  else:
+    return 'Unidentified'

@@ -153,7 +153,7 @@ class Track:
             self.mean, self.covariance, detection.to_xyah())
         self.features.append(detection.feature)
         if detection.color is not None:
-            if len(self.colors) < 30:
+            if len(self.colors) < 90:
                 self.colors.append(detection.color)
             else:
                 del self.colors[0]
