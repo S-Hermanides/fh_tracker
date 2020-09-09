@@ -29,7 +29,7 @@ from tools import generate_detections as gdet
 
 flags.DEFINE_string('framework', 'tf', '(tf, tflite, trt')
 flags.DEFINE_string('weights', './checkpoints/yolov4-416', 'path to weights file')
-flags.DEFINE_string('field_image', './data/FHFIELD.jpg')
+flags.DEFINE_string('field_image', './data/FHFIELD.jpg', 'path to image of field')
 flags.DEFINE_integer('size', 416, 'resize images to')
 flags.DEFINE_boolean('tiny', False, 'yolo or yolo-tiny')
 flags.DEFINE_string('model', 'yolov4', 'yolov3 or yolov4')
@@ -265,7 +265,7 @@ def main(_argv):
             x, y = (bbox[0] + bbox[2]) / 2, bbox[3]
             pts = cv2.perspectiveTransform(np.array([[[x, y]]], dtype="float32"), H_mat)
             x_new, y_new = pts[0][0]
-            cv2.circle(img, (int(x_new), int(y_new)), 15, color, -1)
+            cv2.circle(img, (int(x_new), int(y_new)), 15, color[::-1], -1)
 
 
         # if enable info flag then print details about each track
