@@ -29,11 +29,13 @@ from tools import generate_detections as gdet
 
 flags.DEFINE_string('framework', 'tf', '(tf, tflite, trt')
 flags.DEFINE_string('weights', './checkpoints/yolov4-416', 'path to weights file')
+flags.DEFINE_string('field_image', './data/FHFIELD.jpg')
 flags.DEFINE_integer('size', 416, 'resize images to')
 flags.DEFINE_boolean('tiny', False, 'yolo or yolo-tiny')
 flags.DEFINE_string('model', 'yolov4', 'yolov3 or yolov4')
 flags.DEFINE_string('video', './data/video/test.mp4', 'path to input video or set to 0 for webcam')
 flags.DEFINE_string('output', None, 'path to output video')
+flags.DEFINE_string('output_2', None, 'path to output top down view video')
 flags.DEFINE_string('output_format', 'MP4V', 'codec used in VideoWriter when saving video to file')
 flags.DEFINE_float('iou', 0.45, 'iou threshold')
 flags.DEFINE_float('score', 0.50, 'score threshold')
@@ -100,12 +102,35 @@ def main(_argv):
         codec = cv2.VideoWriter_fourcc(*FLAGS.output_format)
         out = cv2.VideoWriter(FLAGS.output, codec, fps, (width, height))
 
+    # get video ready to save top down view if flag is set
+    if FLAGS.output_2:
+        img = cv2.imread(FLAGS.field_image)
+        width_2 = img.shape[1]
+        height_2 = img.shape[0]
+        fps_2 = int(vid.get(cv2.CAP_PROP_FPS))
+        codec_2 = cv2.VideoWriter_fourcc(*FLAGS.output_format)
+        out_2 = cv2.VideoWriter(FLAGS.output_2, codec_2, fps_2, (width_2, height_2))
+
+        # Calculate homography matrix for perspective shift to top down view
+        # Homography points created by running homography_coordinates.py, adjust for camera / view in video
+        src_points = (np.float32([(10, 1854), (326, 1956), (852, 2065), (1602, 2127), (2244, 2105), (2999, 1999),
+                                  (3531, 1855), (3831, 1740), (1905, 1456), (1897, 1039), (396, 881), (1887, 765),
+                                  (3399, 779), (868, 546), (1876, 457), (2906, 483), (1135, 393), (1881, 331),
+                                  (2632, 345)]).reshape(-1, 1, 2))
+        tgt_points = (np.float32([(154, 428), (153, 546), (153, 674), (153, 802), (150, 898), (150, 1028), (153, 1155),
+                                  (153, 1267), (316, 851), (528, 856), (740, 144), (742, 857), (742, 1557), (1334, 144),
+                                  (1332, 848), (1334, 1559), (1920, 145), (1924, 854), (1924, 1559)]).reshape(-1, 1, 2))
+        H_mat = cv2.findHomography(src_points, tgt_points, method=0)[0]
+
     # while video is running
     while True:
         return_value, frame = vid.read()
         if return_value:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image = Image.fromarray(frame)
+            # reset field image as basis for new frame in birds eye view
+            if FLAGS.output_2:
+                img = cv2.imread(FLAGS.field_image)
         else:
             print('Video has ended or failed, try a different video format!')
             break
@@ -231,10 +256,17 @@ def main(_argv):
                 color = [105, 105, 105]
                 team_name = 'Other'
 
-            # draw bbox on screen
+            # draw bbox on screen of original video
             cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), color, 2)
             cv2.rectangle(frame, (int(bbox[0]), int(bbox[1]-30)), (int(bbox[0])+(len(team_name)+len(str(track.track_id)))*17, int(bbox[1])), color, -1)
             cv2.putText(frame, team_name + "-" + str(track.track_id),(int(bbox[0]), int(bbox[1]-10)),0, 0.75, (255,255,255),2)
+
+            # draw mark on top down view, use coordinates from lower middle of bbox and transform with homography matrix
+            x, y = (bbox[0] + bbox[2]) / 2, bbox[3]
+            pts = cv2.perspectiveTransform(np.array([[[x, y]]], dtype="float32"), H_mat)
+            x_new, y_new = pts[0][0]
+            cv2.circle(img, (int(x_new), int(y_new)), 15, color, -1)
+
 
         # if enable info flag then print details about each track
             if FLAGS.info:
@@ -250,9 +282,11 @@ def main(_argv):
         if not FLAGS.dont_show:
             cv2.imshow("Output Video", result)
         
-        # if output flag is set, save video file
+        # if output flag is set, save video file(s)
         if FLAGS.output:
             out.write(result)
+        if FLAGS.output_2:
+            out_2.write(img)
         if cv2.waitKey(1) & 0xFF == ord('q'): break
     cv2.destroyAllWindows()
 
