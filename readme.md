@@ -32,6 +32,7 @@ There are a number of parameters to tune. Below is a list and an example of how 
 
 # Input jersey colors to identify teams: Team1, Team2
 jersey_colors = 'white','blue'
+# I have created a color dictionary in color_detect.py, but values may need to be tuned for your video, lighting etc.
 
 # score threshold is a hyperparameter for Yolo, the confidence score of a detection being a certain class.
 score_threshold = 0.5
@@ -53,3 +54,6 @@ nn_budget = None
 # nms is a method to prevent multiple detections for the same object. threshold values often used are 0.3-0.5. Tune if multiple boxes appear
 nms_max_overlap = 1.0
 ```
+
+My own result was achieved by running with these settings:
+```!python object_tracker.py --video '/content/drive/My Drive/Colab/project_5/test2.mov' --output '/content/drive/My Drive/Colab/project_5/result2.mp4' --output_2 '/content/drive/My Drive/Colab/project_5/result_bev2.mp4' --output_format mp4v --iou 0.4 --score 0.5 --cosine 0.3 --nms_overlap 0.7 --max_age 60 --n_init 3 --jersey_colors 'white','light blue' --color_threshold 0.08```
